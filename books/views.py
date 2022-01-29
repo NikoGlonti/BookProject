@@ -1,12 +1,26 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.messages.views import SuccessMessageMixin
 from django.db.models import Avg, Count
 from django.db.models.functions import Round
 from django.shortcuts import get_object_or_404, render
 
+from django.urls import reverse_lazy
 from books.models import Author, Book, Publisher, Store
+from django.views.generic import CreateView, DeleteView, DetailView, ListView, TemplateView, UpdateView
 
 
-def home(request):
-    return render(request, 'home.html')
+# def home(request):
+#     return render(request, 'home.html')
+class HomePageView(TemplateView):
+    template_name = 'home.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['num_books'] = Book.objects.count()
+        context['num_authors'] = Author.objects.count()
+        context['num_publishers'] = Publisher.objects.count()
+        context['num_stores'] = Store.objects.count()
+        return context
 
 
 def author(request):
@@ -49,3 +63,42 @@ def store(request):
 def store_inf(request, pk):
     stores_info = get_object_or_404(Store.objects.all().prefetch_related('books'), pk=pk)
     return render(request, "store_inf.html", {'stores_info': stores_info})
+
+
+class BookCreate(LoginRequiredMixin, CreateView):
+    model = Book
+    template_name = 'create_book.html'
+    fields = ['name', 'pages', 'price', 'rating', 'authors', 'publisher', 'pubdate']
+    success_url = reverse_lazy('book:book')
+    login_url = '/admin/login/'
+
+
+class BookUpdate(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
+    model = Book
+    template_name = 'book_update.html'
+    fields = ['name', 'pages', 'price', 'rating', 'authors', 'publisher', 'pubdate']
+    login_url = '/admin/login/'
+
+    def get_success_url(self):
+        book_id = self.kwargs['pk']
+        return reverse_lazy('book:book-update', kwargs={'pk': book_id})
+
+
+class BookDelete(LoginRequiredMixin, DeleteView,):
+    model = Book
+    template_name = 'book_delete.html'
+    success_url = reverse_lazy('book:book')
+    login_url = '/admin/login/'
+
+
+class BookDetail(DetailView):
+    model = Book
+    template_name = 'book_inf.html'
+
+
+class BookList(ListView):
+    model = Book
+    template_name = 'book_ls.html'
+    paginate_by = 500
+    queryset = Book.objects.annotate(num_authors=Count('authors')).select_related('publisher')
+    context_object_name = 'books'

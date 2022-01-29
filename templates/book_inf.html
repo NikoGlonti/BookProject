@@ -29,6 +29,9 @@
             <li>Publisher: <a href="{{ book.publisher.get_absolute_url }}">{{ books_info.publisher }}</a></li>
             <li>Pages: {{ books_info.pages }}</li>
             <li><a href="{% url 'book:home' %}">Home</a></li>
+     <button type="button"><a href="{% url 'book:book-update' books_info.pk %}">Update</a></button>
+    <button type="button"><a href="{% url 'book:book-delete' books_info.pk %}">Delete</a></button>
+
 
             {% endif %}
 </body>

@@ -1,0 +1,8 @@
+{% block content %}
+    <h1>Delete Book</h1>
+    <form method="POST">
+        {% csrf_token %}
+        <input type="submit" value="Delete book">
+        <p><a href="{% url 'book:home' %}">Home page</a></p>
+    </form>
+{% endblock %}

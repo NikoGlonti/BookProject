@@ -1,0 +1,13 @@
+
+
+{% block content %}
+    <h1>Update Book</h1>
+    <form method="POST">
+        {% csrf_token %}
+        <table>
+            {{ form.as_table }}
+        </table>
+        <input type="submit" value="Update book">
+        <p><a href="{% url 'book:home' %}">Home page</a></p>
+    </form>
+{% endblock %}
