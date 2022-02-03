@@ -5,6 +5,8 @@ from django.db.models.functions import Round
 from django.shortcuts import get_object_or_404, render
 
 from django.urls import reverse_lazy
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from books.models import Author, Book, Publisher, Store
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, TemplateView, UpdateView
 
@@ -23,11 +25,13 @@ class HomePageView(TemplateView):
         return context
 
 
+@cache_page(10)
 def author(request):
     author_list = Author.objects.all().prefetch_related('book_set').annotate(books_count=Count('book'))
     return render(request, 'author_ls.html', {'author_list': author_list})
 
 
+@cache_page(10)
 def author_inf(request, pk):
     author_info = get_object_or_404(Author.objects.prefetch_related
                                     ('book_set').annotate(average_rating=Round(Avg('book__rating'))), pk=pk)
@@ -44,6 +48,7 @@ def book_inf(request, pk):
     return render(request, 'book_inf.html', {'books_info': books_info})
 
 
+@cache_page(10)
 def publisher(request):
     publisher_list = Publisher.objects.all().prefetch_related('book_set').annotate(books_count=Count('book'))
     return render(request, 'publisher.html', {'publisher_list': publisher_list})
@@ -55,6 +60,7 @@ def publisher_inf(request, pk):
     return render(request, 'publisher_inf.html', {'publishers_info': publishers_info})
 
 
+@cache_page(10)
 def store(request):
     store_list = Store.objects.all().prefetch_related('books').annotate(books_count=Count('books'))
     return render(request, 'store_ls.html', {'store_list': store_list})
@@ -84,18 +90,20 @@ class BookUpdate(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
         return reverse_lazy('book:book-update', kwargs={'pk': book_id})
 
 
-class BookDelete(LoginRequiredMixin, DeleteView,):
+class BookDelete(LoginRequiredMixin, DeleteView, ):
     model = Book
     template_name = 'book_delete.html'
     success_url = reverse_lazy('book:book')
     login_url = '/admin/login/'
 
 
+@method_decorator(cache_page(10), name='dispatch')
 class BookDetail(DetailView):
     model = Book
     template_name = 'book_inf.html'
 
 
+@method_decorator(cache_page(10), name='dispatch')
 class BookList(ListView):
     model = Book
     template_name = 'book_ls.html'
