@@ -1,27 +1,31 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-{% if author_info %}
-     <h1>Author Info:</h1><br>
-        <ul>
-            <li>Author name: {{ author_info.name }}</li>
-            <li>Age: {{ author_info.age }} y.o.</li>
-            <li>Avg Rating: {{ author_info.average_rating }}</li>
-            <li>
-                <h4>
-                    Books:
-                    <ul>
-                        {% for book in author_info.book_set.all %}
-                            <li><a href="{{ book.get_absolute_url }}">{{ book.name }}</a>({{ book.rating }})</li>
-                        {% endfor %}
+{% block title %}Author information{% endblock %}
 
-                    </ul>
-                    {% endif %}
-    <li><a href="{% url 'book:home' %}">Home</a></li>
-
-</body>
-</html>
+{% block content %}
+    <div>
+        <p><a href="{% url 'book:author' %}">list of authors</a></p>
+        <h1>Author: {{ authors.name }}, age: {{ authors.age }} </h1>
+        <p>Number of his books: {{ authors.book_set.count }}</p>
+        <table>
+            <caption>List of books:</caption>
+            <tr>
+                <th>Name</th>
+                <th>Pages</th>
+                <th>Price</th>
+                <th>Rating</th>
+                <th>Publisher</th>
+                <th>Publication date</th>
+            </tr>
+            {% for book in books %}
+                <tr>
+                <td><a href="{% url 'book:book-detail' pk=book.id %}"> {{ book.name }}</a></td>
+                <td>{{ book.pages }}</td>
+                <td>{{ book.price }}</td>
+                <td>{{ book.rating }}</td>
+                <td>{{ book.publisher }}</td>
+                <td>{{ book.pubdate }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    <p><a href="{% url 'book:home' %}">Home</a></p>
+    </div>
+{% endblock %}

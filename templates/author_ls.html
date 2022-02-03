@@ -1,31 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-
-{% if author_list %}
-    <ul>
-      {% for author in author_list %}
-      <li>
-          <p>
-              <a href="{{author.get_absolute_url}}">
-                  {{ author.name }}
-
-              </a>
-              ({{ author.age }} y.o.  {{ author.books_count }} books)
-
-
-          </p>
-      </li>
-
-      {% endfor %}
-    </ul>
-    {% else %}
-      <p>There are no Authors.</p>
-    {% endif %}
-
-</body>
-</html>
+{% block content %}
+    <p><a href="{% url 'book:home' %}">Home</a></p>
+        <table>
+            <caption><h2>Authors</h2></caption>
+            <tr>
+                <th>Name</th>
+                <th>Age</th>
+                <th>Books</th>
+            </tr>
+            {% for author in authors %}
+                    <td><a href="{% url 'book:author-detail' pk=author.pk %}">{{ author.name }}</a></td>
+                    <td>{{ author.age }}</td>
+                    <td>{{ author.book_set.all|length }} </td>
+                </tr>
+            {% endfor %}
+        </table>
+{% endblock %}

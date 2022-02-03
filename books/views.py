@@ -27,15 +27,17 @@ class HomePageView(TemplateView):
 
 @cache_page(10)
 def author(request):
-    author_list = Author.objects.all().prefetch_related('book_set').annotate(books_count=Count('book'))
-    return render(request, 'author_ls.html', {'author_list': author_list})
+    authors = Author.objects.prefetch_related('book_set__authors')
+    average_rating = Author.objects.aggregate(avg_rating=Avg('book__rating'))
+    context = {'authors': authors, 'average_rating': average_rating['avg_rating']}
+    return render(request, 'author_ls.html', context)
 
 
 @cache_page(10)
 def author_inf(request, pk):
-    author_info = get_object_or_404(Author.objects.prefetch_related
-                                    ('book_set').annotate(average_rating=Round(Avg('book__rating'))), pk=pk)
-    return render(request, 'author_inf.html', {'author_info': author_info})
+    authors = get_object_or_404(Author, pk=pk)
+    books = Book.objects.select_related('publisher')
+    return render(request, 'author_inf.html', {'authors': authors, 'books': books})
 
 
 def book(request):
